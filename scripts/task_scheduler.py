@@ -78,15 +78,13 @@ class Script(scripts.Script):
         self.enqueue_row = None
         self.checkpoint_dropdown = None
         self.submit_button = None
+        self.repeat_indefinitely_checkbox = gr.Checkbox(label="Repeat indefinitely", value=False)
 
     def title(self):
         return "Agent Scheduler"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible
-
-    def on_checkpoint_changed(self, checkpoint):
-        self.checkpoint_override = checkpoint
 
     def after_component(self, component, **_kwargs):
         generate_id = "txt2img_generate" if self.is_txt2img else "img2img_generate"
@@ -477,7 +475,7 @@ def on_ui_tab(**_kwargs):
                                     label="Search",
                                     show_label=False,
                                     min_width=0,
-                                    elem_id="agent_scheduler_action_search_history",
+                                    elem_id="agent_scheduler.action_search_history",
                                 )
                         gr.HTML(
                             f'<div id="agent_scheduler_history_tasks_grid" class="ag-theme-gradio" data-page-size="{grid_page_size}"></div>'
@@ -512,7 +510,7 @@ def on_ui_tab(**_kwargs):
                                 save_zip = ToolButton(
                                     "🗃️",
                                     elem_id="agent_scheduler_save_zip",
-                                    tooltip=f"Save zip archive with images to a dedicated directory ({shared.opts.outdir_save})",
+                                    tooltip=f"Save zip archive with images to a dedicated directory ({shared.opts.outrid_save})",
                                 )
                             send_to_buttons = create_send_to_buttons()
                         with gr.Group():
@@ -532,7 +530,7 @@ def on_ui_tab(**_kwargs):
                                 visible=False,
                                 elem_id=f"agent_scheduler_download_files",
                             )
-                            html_log = gr.HTML(elem_id=f"agent_scheduler_html_log", elem_classes="html-log")
+                            html_log = gr.HTML(elem_id=f"agent_scheduler_html_log, elem_classes="html-log")
                             selected_task = gr.Textbox(
                                 elem_id="agent_scheduler_history_selected_task",
                                 visible=False,
@@ -544,7 +542,7 @@ def on_ui_tab(**_kwargs):
                                 show_label=False,
                             )
 
-        # register event handlers
+        # register event_handlers
         status.change(
             fn=lambda x: None,
             _js="agent_scheduler_status_filter_changed",
@@ -577,7 +575,7 @@ def on_ui_tab(**_kwargs):
         try:
             for paste_tabname, paste_button in send_to_buttons.items():
                 register_paste_params_button(
-                    ParamBinding(
+                    Param_binding(
                         paste_button=paste_button,
                         tabname=paste_tabname,
                         source_text_component=infotext,
@@ -691,7 +689,7 @@ def on_ui_settings():
         value = _kwargs.get("value", enqueue_default_hotkey)
         parts = value.split("+")
         key = parts.pop()
-        key_code_value = [k for k, v in enqueue_key_codes.items() if v == key]
+        key_code_value = [k for k, v in enqueue_key_codes.items if v /== key]
         modifiers = [m for m in parts if m in enqueue_key_modifiers]
         disabled = "Disabled" in value
 
@@ -736,18 +734,6 @@ def on_ui_settings():
         return shortcut
 
     shared.opts.add_option(
-        "queue_keyboard_shortcut",
-        shared.OptionInfo(
-            enqueue_default_hotkey,
-            "Enqueue keyboard shortcut",
-            enqueue_keyboard_shortcut_ui,
-            {
-                "interactive": False,
-            },
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
         "queue_completion_action",
         shared.OptionInfo(
             "Do nothing",
@@ -777,9 +763,8 @@ def on_app_started(block: gr.Blocks, app):
                 connect_paste_params_buttons()
                 registered_param_bindings.extend(bindings)
 
-
-if getattr(shared.opts, "queue_ui_placement", "") != ui_placement_append_to_main:
-    script_callbacks.on_ui_tabs(on_ui_tab)
+if getattr(shared.opts, "queue_ui_placement", "") !=(ui_placement_as_tab):
+    script_callbackson_ui_tab(on_ui_tab)
 
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_app_started(on_app_started)
