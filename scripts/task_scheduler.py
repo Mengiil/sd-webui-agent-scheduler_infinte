@@ -383,6 +383,10 @@ def on_ui_tab(**_kwargs):
     with gr.Blocks(analytics_enabled=False) as scheduler_tab:
         with gr.Tabs(elem_id="agent_scheduler_tabs"):
             with gr.Tab("Task Queue", id=0, elem_id="agent_scheduler_pending_tasks_tab"):
+    # Add a new section for the checkbox
+    with gr.Row():
+        repeat_tasks_checkbox = gr.Checkbox(label="Aufgaben wiederholen", value=False)
+    
                 with gr.Row(elem_id="agent_scheduler_pending_tasks_wrapper"):
                     with gr.Column(scale=1):
                         with gr.Row(elem_id="agent_scheduler_pending_tasks_actions", elem_classes="flex-row"):
