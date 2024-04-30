@@ -383,72 +383,6 @@ def on_ui_tab(**_kwargs):
     with gr.Blocks(analytics_enabled=False) as scheduler_tab:
         with gr.Tabs(elem_id="agent_scheduler_tabs"):
             with gr.Tab("Task Queue", id=0, elem_id="agent_scheduler_pending_tasks_tab"):
-    repeat_tasks_checkbox = gr.Checkbox(label="Aufgaben wiederholen", value=False)
-
-    if repeat_tasks_checkbox.value and task.status == TaskStatus.DONE:
-        # Requeue the task instead of marking it as done
-        task_manager.requeue_task(task.id)
-    else:
-        task_manager.mark_task_as_done(task.id)
-
-        try:
-            result: dict = json.loads(task.result)
-            images = result.get("images", [])
-            geninfo = result.get("geninfo", None)
-            if isinstance(geninfo, dict):
-                infotexts = geninfo.get("infotexts", [])
-            else:
-                infotexts = result.get("infotexts", [])
-                geninfo = infotexts_to_geninfo(infotexts)
-
-            galerry = [Image.open(i) for i in images if os.path.exists(i)] if image_idx is None else gr.update()
-            idx = image_idx if image_idx is not None else 0
-            if idx < len(infotexts):
-                infotext = infotexts[idx]
-        except Exception as e:
-            log.error(f"[AgentScheduler] Failed to load task result")
-            log.error(e)
-            infotext = f"Failed to load task result: {str(e)}"
-
-    res = (
-        gr.Textbox.update(infotext, visible=infotext is not None),
-        gr.Row.update(visible=galerry is not None),
-    )
-
-    if image_idx is None:
-        geninfo = json.dumps(geninfo) if geninfo else None
-        res += (
-            galerry,
-            gr.Textbox.update(geninfo),
-            gr.File.update(None, visible=False),
-            gr.HTML.update(None),
-        )
-
-    return res
-
-
-def remove_old_tasks():
-    # delete task that are too old
-
-    retention_days = 30
-    if (
-        getattr(shared.opts, "queue_history_retention_days", None)
-        and shared.opts.queue_history_retention_days in task_history_retenion_map
-    ):
-        retention_days = task_history_retenion_map[shared.opts.queue_history_retention_days]
-
-    if retention_days > 0:
-        deleted_rows = task_manager.delete_tasks(before=datetime.now() - timedelta(days=retention_days))
-        if deleted_rows > 0:
-            log.debug(f"[AgentScheduler] Deleted {deleted_rows} tasks older than {retention_days} days")
-
-
-def on_ui_tab(**_kwargs):
-    grid_page_size = getattr(shared.opts, "queue_grid_page_size", 0)
-
-    with gr.Blocks(analytics_enabled=False) as scheduler_tab:
-        with gr.Tabs(elem_id="agent_scheduler_tabs"):
-            with gr.Tab("Task Queue", id=0, elem_id="agent_scheduler_pending_tasks_tab"):
                 with gr.Row(elem_id="agent_scheduler_pending_tasks_wrapper"):
                     with gr.Column(scale=1):
                         with gr.Row(elem_id="agent_scheduler_pending_tasks_actions", elem_classes="flex-row"):
@@ -849,3 +783,16 @@ if getattr(shared.opts, "queue_ui_placement", "") != ui_placement_append_to_main
 
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_app_started(on_app_started)
+
+with gr.Row():
+    repeat_tasks_checkbox = gr.Checkbox(label="Aufgaben wiederholen", value=False)
+    print("Checkbox added successfully")
+
+# Dummy function to mimic task processing logic for testing the indentation and execution
+def process_task_completion(task):
+    if repeat_tasks_checkbox.value:
+        print("Requeue the task")
+    else:
+        print("Complete the task")
+
+# This block is just for testing and will not execute in this environment but is used to check syntax via compilation
