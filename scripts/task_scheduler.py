@@ -385,12 +385,12 @@ def on_ui_tab(**_kwargs):
             with gr.Tab("Task Queue", id=0, elem_id="agent_scheduler_pending_tasks_tab"):
     with gr.Row():
         repeat_tasks_checkbox = gr.Checkbox(label="Aufgaben wiederholen", value=False)
-        
-    if repeat_tasks_checkbox.value and task.status == TaskStatus.DONE:
-        # Requeue the task instead of marking it as done
-        task_manager.requeue_task(task.id)
-    else:
-        task_manager.mark_task_as_done(task.id)
+
+        if repeat_tasks_checkbox.value and task.status == TaskStatus.DONE:
+            # Requeue the task instead of marking it as done
+            task_manager.requeue_task(task.id)
+        else:
+            task_manager.mark_task_as_done(task.id)
 
         try:
             result: dict = json.loads(task.result)
