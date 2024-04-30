@@ -794,7 +794,6 @@ def process_task_completion(task):
     if task.status == TaskStatus.DONE:
         # Always requeue the task instead of marking it as done
         task_manager.requeue_task(task.id)
- gr
 from PIL import Image
 from uuid import uuid4
 from typing import List
